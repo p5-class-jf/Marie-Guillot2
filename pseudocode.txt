@@ -1,0 +1,6 @@
+I would create a recursive function “make a plant” that rotate the matrix, 
+draw a line (or many to get a more complex shape) 
+and call “make a plant” two times to create a divided branch. 
+The function would take the number of branches needed to finish the plant as a parameter, 
+and each time the function is called the number is decremented, 
+so the function can stop when the number is 0. 
