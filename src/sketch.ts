@@ -23,7 +23,7 @@ const params = {
     PousseArbre : 5,
     tournePlante : 0,
     NoiseScale : 10,
-    NoiseSeed : 70,
+    NoiseSeed : 1,
     Download_Image: () => save(),
 }
 gui.add(params, "Seed", 0, 255, 1)
@@ -33,7 +33,7 @@ gui.add(params, "Angle", 0, 1.7, 0.001)
 gui.add(params, "PousseArbre", 0, 12, 1)
 gui.add(params, "tournePlante", -1.6, 1.6, 0.1)
 gui.add(params, "NoiseScale", 0, 15, 0.1)
-gui.add(params, "NoiseSeed", 0, 100, 1)
+gui.add(params, "NoiseSeed", 0.1, 1, 0.0001)
 gui.add(params, "Download_Image")
 
 // -------------------
@@ -224,13 +224,13 @@ function draw() {
     randomSeed(params.Seed);
     
     // Mise en place du fond cyanotype
-    push();
-    imageMode(CENTER);
-    translate(width/2, height/2);
-    let pivotBackground= int(random(0,100));
-    rotate(pivotBackground*(PI/2));
-    image(paper, 0, 0, width, height);
-    pop();
+    // push();
+    // imageMode(CENTER);
+    // translate(width/2, height/2);
+    // let pivotBackground= int(random(0,100));
+    // rotate(pivotBackground*(PI/2));
+    // image(paper, 0, 0, width, height);
+    // pop();
 
     // Draw the noise on a texture
     noiseTexture.shader(noiseShader);
@@ -240,19 +240,19 @@ function draw() {
     noiseTexture.noStroke();
     noiseTexture.rect(-width/2, -height/2, width, height);
     // Apply the noise texture
-    blendMode(SOFT_LIGHT);
+    // blendMode(SOFT_LIGHT);
     image(noiseTexture, 0, 0, width, height);
-    blendMode(BLEND);
+    // blendMode(BLEND);
 
     // Emplacement dessin
-    bougeDessin();
-    rotate(params.tournePlante);
+    // bougeDessin();
+    // rotate(params.tournePlante);
 
-    // Dessin de la plante
+    // // Dessin de la plante
     
-    let longueurArbre = params.PousseArbre;
-    divisePlant(longueurArbre, 0);
-    divisePlant(longueurArbre-1, 1);
+    // let longueurArbre = params.PousseArbre;
+    // divisePlant(longueurArbre, 0);
+    // divisePlant(longueurArbre-1, 1);
     
 }
 
