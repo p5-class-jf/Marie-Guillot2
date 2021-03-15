@@ -1,3 +1,5 @@
+var noiseShader;
+var noiseTexture;
 var xDessin = 0;
 var yDessin = 0;
 var flagBouge = true;
@@ -11,6 +13,8 @@ var params = {
     Angle: 0.77,
     PousseArbre: 5,
     tournePlante: 0,
+    NoiseScale: 5,
+    NoiseSeed: 0,
     Download_Image: function () { return save(); },
 };
 gui.add(params, "Seed", 0, 255, 1);
@@ -19,6 +23,8 @@ gui.add(params, "longFleur", -150, 0, 1);
 gui.add(params, "Angle", 0, 1.7, 0.001);
 gui.add(params, "PousseArbre", 0, 12, 1);
 gui.add(params, "tournePlante", -1.6, 1.6, 0.1);
+gui.add(params, "NoiseScale", 0, 15, 0.1);
+gui.add(params, "NoiseSeed", 0, 100, 1);
 gui.add(params, "Download_Image");
 function gradientLine(Longueur, alpha) {
     var colorStart = color("rgba(255, 255, 255," + alpha + ")");
@@ -178,14 +184,14 @@ function draw() {
     rotate(pivotBackground * (PI / 2));
     image(paper, 0, 0, width, height);
     pop();
+    noiseTexture.shader(noiseShader);
+    noiseShader.setUniform("uAspectRatio", width / height);
+    noiseShader.setUniform("uNoiseScale", params.NoiseScale);
+    noiseShader.setUniform("uNoiseSeed", params.NoiseSeed);
+    noiseTexture.noStroke();
+    noiseTexture.rect(-width / 2, -height / 2, width, height);
     blendMode(SOFT_LIGHT);
-    var scale = random(0, 0.02);
-    for (var i = 0; i < width; i++) {
-        for (var j = 0; j < height; j++) {
-            stroke(255, map(noise(i * scale, j * scale), 0, 1, 0, 200));
-            point(i, j);
-        }
-    }
+    image(noiseTexture, 0, 0, width, height);
     blendMode(BLEND);
     bougeDessin();
     rotate(params.tournePlante);
@@ -195,12 +201,15 @@ function draw() {
 }
 function preload() {
     paper = loadImage("../img/cyanotypePaper.jpg");
+    noiseShader = loadShader("../shader/vertex.vert", "../shader/noise.frag");
 }
 function setup() {
     p6_CreateCanvas();
+    noiseTexture = createGraphics(width, height, WEBGL);
 }
 function windowResized() {
     p6_ResizeCanvas();
+    noiseTexture.resizeCanvas(width, height);
 }
 var __ASPECT_RATIO = 1;
 var __MARGIN_SIZE = 25;
