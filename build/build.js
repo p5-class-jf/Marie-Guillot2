@@ -200,8 +200,8 @@ function draw() {
     divisePlant(longueurArbre - 1, 1);
 }
 function preload() {
-    paper = loadImage("../img/cyanotypePaper.jpg");
-    noiseShader = loadShader("../shader/vertex.vert", "../shader/noise.frag");
+    paper = loadImage("img/cyanotypePaper.jpg");
+    noiseShader = loadShader("shader/vertex.vert", "shader/noise.frag");
 }
 function setup() {
     p6_CreateCanvas();
