@@ -1,20 +1,28 @@
+var xDessin = 0;
+var yDessin = 0;
+var flagBouge = true;
+var mouseInScreen;
 var paper;
 var gui = new dat.GUI();
 var params = {
     Seed: 124,
     Long: -48,
+    longFleur: -48,
     Angle: 0.77,
     PousseArbre: 5,
+    tournePlante: 0,
     Download_Image: function () { return save(); },
 };
 gui.add(params, "Seed", 0, 255, 1);
-gui.add(params, "Long", -150, 0, 1);
+gui.add(params, "Long", -150, -1, 1);
+gui.add(params, "longFleur", -150, 0, 1);
 gui.add(params, "Angle", 0, 1.7, 0.001);
 gui.add(params, "PousseArbre", 0, 12, 1);
+gui.add(params, "tournePlante", -1.6, 1.6, 0.1);
 gui.add(params, "Download_Image");
-function gradientLine(Longueur) {
-    var colorStart = color('rgba(19, 100, 60,1)');
-    var colorEnd = color('rgba(19, 100, 60,0.2)');
+function gradientLine(Longueur, alpha) {
+    var colorStart = color("rgba(255, 255, 255," + alpha + ")");
+    var colorEnd = color('rgba(255, 255, 255, 0)');
     for (var i = 0; i >= Longueur; i--) {
         var c = lerpColor(colorStart, colorEnd, (1 / Longueur) * i);
         strokeWeight(1.5);
@@ -45,16 +53,16 @@ function smallLine(stop) {
     }
     var j = 0;
     while (j < 2) {
-        gradientLine(longueurLigne);
+        gradientLine(longueurLigne, 1);
         push();
         var angle = ((PI / 12) - j * (PI / 7));
         rotate(-angle);
-        gradientLine((3 - j) * (2 / 3) * longueurLigne);
+        gradientLine((3 - j) * (2 / 3) * longueurLigne, 1);
         pop();
         translate(0, longueurLigne);
         j++;
     }
-    gradientLine(longueurLigne);
+    gradientLine(longueurLigne, 1);
     translate(0, (1 / 2) * longueurLigne);
 }
 function divisePlant(stop, direction) {
@@ -79,24 +87,114 @@ function divisePlant(stop, direction) {
         pop();
     }
     if (stop == 1) {
-        smallLine(stop);
+        var extremite = int(random(1, 3));
+        if (extremite == 1) {
+            feuille();
+        }
+        else {
+            translate(0, params.Long * reduction * (1 / 3));
+            fleur();
+        }
     }
     pop();
 }
-function draw() {
-    image(paper, 0, 0, width, height);
-    randomSeed(params.Seed);
+function feuille() {
+    var longFeuille = params.Long;
+    var angle = params.Angle * 1.2;
+    var iMax;
+    if (longFeuille < -30) {
+        iMax = -longFeuille / 5;
+    }
+    else {
+        iMax = 6;
+    }
+    var arrondi;
+    var forme = random(2, 5);
+    for (var i = 1; i < iMax; i++) {
+        gradientLine(longFeuille / iMax, 1);
+        push();
+        rotate(-angle);
+        arrondi = map(i, 0, iMax, 0, 1);
+        gradientLine(longFeuille * sin(PI * sqrt(arrondi)) * (1 / forme), 1);
+        rotate(2 * angle);
+        gradientLine(longFeuille * sin(PI * sqrt(arrondi)) * (1 / forme), 1);
+        pop();
+        translate(0, longFeuille / iMax);
+    }
+}
+function fleur() {
+    var nbPetales = random(20, 40);
+    var reducLong = random(1, 5);
+    var longPetales = params.longFleur / reducLong;
+    var nbCouches = random(1, 8);
+    var longCouches = longPetales / nbCouches;
+    var transparence = 0.8 / (nbCouches);
+    var taillePetale = 1;
+    var facteur = 1;
+    for (var j = 0; j < nbCouches; j++) {
+        for (var i = 0; i < nbPetales; i++) {
+            rotate(TWO_PI / nbPetales + j * (PI / 8));
+            gradientLine((nbCouches - j) * longCouches * taillePetale, 0.2 + j * transparence);
+            push();
+            translate(0, (nbCouches - j) * longCouches * taillePetale);
+            fill("rgba(255,255,255," + j * (0.2 / nbCouches) + ")");
+            ellipse(0, 0, ((nbCouches - j) * longCouches * taillePetale));
+            noFill();
+            pop();
+            if (i % 2 == 0) {
+                facteur = facteur * (-1);
+            }
+            taillePetale = taillePetale + facteur * 0.1;
+        }
+    }
+}
+function bougeDessin() {
     noFill();
-    var B = 255;
-    stroke("#136428");
-    translate(width / 2, 4 * height / 5);
+    if (flagBouge) {
+        if (mouseInScreen) {
+            xDessin = mouseX;
+            yDessin = mouseY;
+        }
+        else {
+            xDessin = width / 2;
+            yDessin = 4 * height / 5;
+        }
+    }
+    translate(0, 0);
+    translate(xDessin, yDessin);
+}
+function mouseClicked() {
+    if (mouseInScreen) {
+        flagBouge = false;
+    }
+}
+function draw() {
+    mouseInScreen = (mouseX > -10 && mouseX < width + 10 && mouseY > -10 && mouseY < height + 10);
+    randomSeed(params.Seed);
     push();
+    imageMode(CENTER);
+    translate(width / 2, height / 2);
+    var pivotBackground = int(random(0, 100));
+    rotate(pivotBackground * (PI / 2));
+    image(paper, 0, 0, width, height);
+    pop();
+    blendMode(SOFT_LIGHT);
+    var scale = random(0, 0.02);
+    for (var i = 0; i < width; i++) {
+        for (var j = 0; j < height; j++) {
+            stroke(255, map(noise(i * scale, j * scale), 0, 1, 0, 200));
+            point(i, j);
+        }
+    }
+    blendMode(BLEND);
+    bougeDessin();
+    rotate(params.tournePlante);
     var longueurArbre = params.PousseArbre;
     divisePlant(longueurArbre, 0);
     divisePlant(longueurArbre - 1, 1);
 }
 function preload() {
-    paper = loadImage("../img/paper.jpg");
+    paper = loadImage("../img/cyanotypePaper.jpg");
 }
 function setup() {
     p6_CreateCanvas();
