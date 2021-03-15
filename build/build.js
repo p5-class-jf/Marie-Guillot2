@@ -13,8 +13,8 @@ var params = {
     Angle: 0.77,
     PousseArbre: 5,
     tournePlante: 0,
-    NoiseScale: 5,
-    NoiseSeed: 0,
+    NoiseScale: 10,
+    NoiseSeed: 70,
     Download_Image: function () { return save(); },
 };
 gui.add(params, "Seed", 0, 255, 1);
